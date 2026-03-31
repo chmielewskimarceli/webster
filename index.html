@@ -36,6 +36,52 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
+        /* ── Transition container ── */
+        #stage {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            will-change: transform, opacity;
+        }
+
+        /* Stany animacji */
+        .slide-enter-from-bottom {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .slide-enter-from-top {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        .slide-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
+                        opacity   0.65s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .slide-exit-to-top {
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
+                        opacity   0.65s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .slide-exit-to-bottom {
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
+                        opacity   0.65s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
         /* Hamburger active state */
         #menu-btn.active div:nth-child(1) {
             transform: translateY(8px) rotate(45deg);
@@ -85,11 +131,8 @@
         </ul>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <main id="app-content"
-          class="h-screen w-screen flex flex-col items-center justify-center text-center
-                 transition-opacity transition-transform duration-500 ease-in-out opacity-0 translate-y-5">
-    </main>
+    <!-- STAGE: tu żyją slajdy -->
+    <div id="stage"></div>
 
     <!-- FOOTER -->
     <footer class="fixed bottom-0 left-0 w-full z-80 p-4 text-xs text-gray-600 flex justify-between items-center bg-transparent">
@@ -192,43 +235,72 @@
     };
 
     // ─── Stan ─────────────────────────────────────────────────────────────────
-    const appContent  = document.getElementById('app-content');
+    const stage       = document.getElementById('stage');
     const menuBtn     = document.getElementById('menu-btn');
     const menuOverlay = document.getElementById('menu-overlay');
 
-    let currentPage = null; // null = nic jeszcze nie załadowane
+    const sectionOrder = ['home', 'portfolio', 'oferta', 'kontakt', 'wycena'];
+    let currentPage = null;
+    let isAnimating = false;
 
-    // ─── Nawigacja ────────────────────────────────────────────────────────────
+    // ─── Nawigacja ze slidem ──────────────────────────────────────────────────
     function navigate(page) {
-        if (currentPage === page) return;
+        if (currentPage === page || isAnimating) return;
 
-        const isFirst = currentPage === null;
+        const prevPage = currentPage;
         currentPage = page;
+        history[prevPage ? 'pushState' : 'replaceState']({ page }, '', `#${page}`);
 
-        if (isFirst) {
-            // Pierwsze załadowanie: po prostu pokaż stronę bez animacji wyjścia
-            appContent.innerHTML = sectionsContent[page] || sectionsContent['home'];
-            // Małe opóźnienie, żeby przeglądarka zdążyła narysować stare klasy
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    appContent.classList.remove('opacity-0', 'translate-y-5');
-                });
-            });
-            history.replaceState({ page }, '', `#${page}`);
-        } else {
-            // Kolejne przejścia: animacja wyjścia → zmiana treści → animacja wejścia
-            appContent.classList.add('opacity-0', 'translate-y-5');
-            setTimeout(() => {
-                appContent.innerHTML = sectionsContent[page] || sectionsContent['home'];
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        appContent.classList.remove('opacity-0', 'translate-y-5');
-                    });
-                });
-                appContent.scrollTo(0, 0);
-                history.pushState({ page }, '', `#${page}`);
-            }, 500);
+        const html = sectionsContent[page] || sectionsContent['home'];
+
+        // Pierwsze załadowanie — wjedź z dołu bez animacji wyjścia
+        if (!prevPage) {
+            const slide = makeSlide(html);
+            slide.classList.add('slide-enter-from-bottom');
+            stage.appendChild(slide);
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                slide.classList.add('slide-active');
+                slide.classList.remove('slide-enter-from-bottom');
+            }));
+            return;
         }
+
+        // Ustal kierunek: w górę czy w dół?
+        const prevIdx = sectionOrder.indexOf(prevPage);
+        const nextIdx = sectionOrder.indexOf(page);
+        const goingForward = nextIdx > prevIdx; // forward = nowa wjeżdża z dołu
+
+        isAnimating = true;
+
+        // Stary slajd
+        const oldSlide = stage.querySelector('.slide');
+        oldSlide.classList.add('slide-active'); // upewnij się że ma transition
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            oldSlide.classList.add(goingForward ? 'slide-exit-to-top' : 'slide-exit-to-bottom');
+        }));
+
+        // Nowy slajd — startuje poza ekranem
+        const newSlide = makeSlide(html);
+        newSlide.classList.add(goingForward ? 'slide-enter-from-bottom' : 'slide-enter-from-top');
+        stage.appendChild(newSlide);
+
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            newSlide.classList.add('slide-active');
+            newSlide.classList.remove('slide-enter-from-bottom', 'slide-enter-from-top');
+        }));
+
+        // Po zakończeniu animacji — usuń stary slajd
+        oldSlide.addEventListener('transitionend', () => {
+            oldSlide.remove();
+            isAnimating = false;
+        }, { once: true });
+    }
+
+    function makeSlide(html) {
+        const el = document.createElement('div');
+        el.className = 'slide';
+        el.innerHTML = html;
+        return el;
     }
 
     // ─── Hamburger ───────────────────────────────────────────────────────────
@@ -249,25 +321,9 @@
     // ─── Przyciski wstecz/dalej ───────────────────────────────────────────────
     window.addEventListener('popstate', (e) => {
         const page = e.state?.page || 'home';
-        // Tymczasowo zresetuj currentPage, żeby navigate() zadziałało
         currentPage = null;
         navigate(page);
     });
-
-    // ─── Swipe (mobile) ───────────────────────────────────────────────────────
-    const sectionOrder = ['home', 'portfolio', 'oferta', 'kontakt', 'wycena'];
-    let touchstartY = 0;
-
-    document.addEventListener('touchstart', e => {
-        touchstartY = e.changedTouches[0].screenY;
-    }, { passive: true });
-
-    document.addEventListener('touchend', e => {
-        const diff = touchstartY - e.changedTouches[0].screenY;
-        const idx  = sectionOrder.indexOf(currentPage);
-        if (diff > 70  && idx < sectionOrder.length - 1) navigate(sectionOrder[idx + 1]);
-        if (diff < -70 && idx > 0)                        navigate(sectionOrder[idx - 1]);
-    }, { passive: true });
 
     // ─── Inicjalizacja ────────────────────────────────────────────────────────
     const initialPage = window.location.hash.substring(1) || 'home';
