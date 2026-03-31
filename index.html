@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDIO.JS - Tworzymy Twoją Przyszłość w Sieci</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'matte-black': '#121212',
+                        'silver-light': '#D1D5DB',
+                        'silver-dark': '#4B5563',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        body::-webkit-scrollbar { display: none; }
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .silver-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Hamburger active state */
+        #menu-btn.active div:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+        #menu-btn.active div:nth-child(2) {
+            opacity: 0;
+        }
+        #menu-btn.active div:nth-child(3) {
+            width: 2rem;
+            transform: translateY(-8px) rotate(-45deg);
+        }
+        #menu-btn div {
+            transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-matte-black text-white font-sans overflow-hidden">
+
+    <!-- NAV -->
+    <nav class="fixed top-0 left-0 w-full z-[100] p-6 flex justify-between items-center bg-transparent">
+        <div class="text-white font-bold tracking-tighter text-2xl cursor-pointer" onclick="navigate('home')">
+            STUDIO.JS
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+            <a href="#home"      onclick="navigate('home')"      class="text-sm uppercase tracking-widest hover:text-silver-light transition">Start</a>
+            <a href="#portfolio" onclick="navigate('portfolio')" class="text-sm uppercase tracking-widest hover:text-silver-light transition">Portfolio</a>
+            <a href="#oferta"    onclick="navigate('oferta')"    class="text-sm uppercase tracking-widest hover:text-silver-light transition">Oferta</a>
+            <a href="#kontakt"   onclick="navigate('kontakt')"   class="text-sm uppercase tracking-widest hover:text-silver-light transition">Kontakt</a>
+            <button onclick="navigate('wycena')" class="border border-white/20 px-4 py-2 text-sm hover:bg-white hover:text-black transition">Wycena</button>
+        </div>
+        <button id="menu-btn" class="md:hidden group flex flex-col gap-1.5 focus:outline-none">
+            <div class="w-8 h-0.5 bg-white"></div>
+            <div class="w-8 h-0.5 bg-white"></div>
+            <div class="w-5 h-0.5 bg-white"></div>
+        </button>
+    </nav>
+
+    <!-- MOBILE MENU OVERLAY -->
+    <div id="menu-overlay" class="fixed inset-0 bg-matte-black z-[90] flex items-center justify-center
+                                   opacity-0 pointer-events-none transition-opacity duration-500 ease-in-out">
+        <ul class="text-center space-y-8">
+            <li><a href="#" onclick="closeMenu('home')"      class="text-5xl md:text-6xl font-light text-white hover:text-silver-light transition duration-200">Start</a></li>
+            <li><a href="#" onclick="closeMenu('portfolio')" class="text-5xl md:text-6xl font-light text-white hover:text-silver-light transition duration-200">Portfolio</a></li>
+            <li><a href="#" onclick="closeMenu('oferta')"    class="text-5xl md:text-6xl font-light text-white hover:text-silver-light transition duration-200">Oferta</a></li>
+            <li><a href="#" onclick="closeMenu('kontakt')"   class="text-5xl md:text-6xl font-light text-white hover:text-silver-light transition duration-200">Kontakt</a></li>
+            <li><a href="#" onclick="closeMenu('wycena')"    class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-silver-light to-white">Wycena</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="app-content"
+          class="h-screen w-screen flex flex-col items-center justify-center text-center
+                 transition-opacity transition-transform duration-500 ease-in-out opacity-0 translate-y-5">
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="fixed bottom-0 left-0 w-full z-80 p-4 text-xs text-gray-600 flex justify-between items-center bg-transparent">
+        <div>&copy; 2025 STUDIO.JS. Wszelkie prawa zastrzeżone.</div>
+        <div class="hidden md:block">Strona stworzona z pasją.</div>
+    </footer>
+
+    <script>
+    // ─── Treści sekcji ───────────────────────────────────────────────────────────
+    const sectionsContent = {
+        home: `
+            <section class="h-full w-full flex flex-col justify-center items-center px-6 md:px-20 text-center">
+                <h1 class="text-6xl md:text-8xl font-extrabold leading-tight text-white mb-6">
+                    Kodujemy <br><span class="text-silver-light">przyszłość.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-400 max-w-2xl">
+                    Zmieniamy wizje w interaktywne doświadczenia. Tworzymy strony, które nie tylko wyglądają, ale działają.
+                </p>
+                <div class="mt-10 flex flex-col md:flex-row gap-4">
+                    <button onclick="navigate('portfolio')" class="bg-silver-light text-matte-black px-8 py-3 text-lg font-semibold rounded-full hover:bg-white transition duration-300">Zobacz Portfolio</button>
+                    <button onclick="navigate('wycena')"    class="border border-silver-dark text-silver-light px-8 py-3 text-lg font-semibold rounded-full hover:bg-silver-dark hover:text-white transition duration-300">Darmowa Wycena</button>
+                </div>
+            </section>
+        `,
+        portfolio: `
+            <section class="h-full w-full flex flex-col justify-center items-center p-6 md:p-20 text-center">
+                <h2 class="text-5xl md:text-6xl font-bold text-silver-light mb-8">Nasze Realizacje</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl">
+                    <div class="silver-card p-6 rounded-lg shadow-xl text-left">
+                        <h3 class="text-2xl font-semibold mb-2 text-white">Projekt Echo</h3>
+                        <p class="text-gray-400 text-sm mb-4">Strona korporacyjna / Next.js / Tailwind CSS</p>
+                        <p class="text-silver-light leading-relaxed">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <div class="silver-card p-6 rounded-lg shadow-xl text-left">
+                        <h3 class="text-2xl font-semibold mb-2 text-white">E-commerce Quantum</h3>
+                        <p class="text-gray-400 text-sm mb-4">Sklep internetowy / React / Sanity CMS</p>
+                        <p class="text-silver-light leading-relaxed">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    </div>
+                    <div class="silver-card p-6 rounded-lg shadow-xl text-left">
+                        <h3 class="text-2xl font-semibold mb-2 text-white">Aplikacja Flow</h3>
+                        <p class="text-gray-400 text-sm mb-4">Web App / Vue.js / Firebase</p>
+                        <p class="text-silver-light leading-relaxed">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                    </div>
+                </div>
+            </section>
+        `,
+        oferta: `
+            <section class="h-full w-full flex flex-col justify-center items-center p-6 md:p-20 text-center">
+                <h2 class="text-5xl md:text-6xl font-bold text-silver-light mb-8">Co Oferujemy</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl">
+                    <div class="p-6 rounded-lg silver-card shadow-xl">
+                        <h3 class="text-3xl font-semibold mb-3 text-white">Strony Wizytówki</h3>
+                        <p class="text-gray-400">Nowoczesny design, responsywność i optymalizacja SEO dla Twojej obecności online.</p>
+                    </div>
+                    <div class="p-6 rounded-lg silver-card shadow-xl">
+                        <h3 class="text-3xl font-semibold mb-3 text-white">Sklepy E-commerce</h3>
+                        <p class="text-gray-400">Efektywne platformy sprzedażowe z intuicyjnym UX i bezpiecznymi płatnościami.</p>
+                    </div>
+                    <div class="p-6 rounded-lg silver-card shadow-xl">
+                        <h3 class="text-3xl font-semibold mb-3 text-white">Aplikacje Webowe</h3>
+                        <p class="text-gray-400">Szyte na miarę rozwiązania, automatyzujące procesy i wspierające rozwój biznesu.</p>
+                    </div>
+                </div>
+            </section>
+        `,
+        kontakt: `
+            <section class="h-full w-full flex flex-col justify-center items-center p-6 md:p-20 text-center">
+                <h2 class="text-5xl md:text-6xl font-bold text-silver-light mb-8">Skontaktuj Się</h2>
+                <div class="silver-card p-8 rounded-lg shadow-xl max-w-xl w-full">
+                    <p class="text-lg text-white mb-6">Chętnie odpowiemy na Twoje pytania.</p>
+                    <div class="space-y-4">
+                        <input type="text"   placeholder="Imię i Nazwisko" class="w-full p-3 bg-matte-black border border-silver-dark rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-silver-light"/>
+                        <input type="email"  placeholder="Adres E-mail"    class="w-full p-3 bg-matte-black border border-silver-dark rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-silver-light"/>
+                        <textarea placeholder="Twoja Wiadomość" rows="5"   class="w-full p-3 bg-matte-black border border-silver-dark rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-silver-light"></textarea>
+                        <button class="bg-silver-light text-matte-black px-6 py-3 font-semibold rounded-md hover:bg-white transition duration-300">Wyślij Wiadomość</button>
+                    </div>
+                </div>
+            </section>
+        `,
+        wycena: `
+            <section class="h-full w-full flex flex-col justify-center items-center p-6 md:p-20 text-center">
+                <h2 class="text-5xl md:text-6xl font-bold text-silver-light mb-8">Darmowa Wycena Projektu</h2>
+                <div class="silver-card p-8 rounded-lg shadow-xl max-w-2xl w-full">
+                    <p class="text-lg text-white mb-6">Opowiedz nam o swoim projekcie, a my przygotujemy spersonalizowaną ofertę.</p>
+                    <div class="space-y-4">
+                        <select class="w-full p-3 bg-matte-black border border-silver-dark rounded-md text-white focus:outline-none focus:border-silver-light">
+                            <option value="">Jaki typ strony Cię interesuje?</option>
+                            <option value="wizytowka">Strona Wizytówka</option>
+                            <option value="ecommerce">Sklep E-commerce</option>
+                            <option value="aplikacja">Aplikacja Webowa</option>
+                            <option value="inne">Inne / Konsultacja</option>
+                        </select>
+                        <input type="text" placeholder="Budżet (opcjonalnie)" class="w-full p-3 bg-matte-black border border-silver-dark rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-silver-light"/>
+                        <textarea placeholder="Opisz swój projekt..." rows="7" class="w-full p-3 bg-matte-black border border-silver-dark rounded-md text-white placeholder-gray-500 focus:outline-none focus:border-silver-light"></textarea>
+                        <button class="bg-silver-light text-matte-black px-6 py-3 font-semibold rounded-md hover:bg-white transition duration-300">Wyślij Zapytanie</button>
+                    </div>
+                </div>
+            </section>
+        `,
+    };
+
+    // ─── Stan ─────────────────────────────────────────────────────────────────
+    const appContent  = document.getElementById('app-content');
+    const menuBtn     = document.getElementById('menu-btn');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    let currentPage = null; // null = nic jeszcze nie załadowane
+
+    // ─── Nawigacja ────────────────────────────────────────────────────────────
+    function navigate(page) {
+        if (currentPage === page) return;
+
+        const isFirst = currentPage === null;
+        currentPage = page;
+
+        if (isFirst) {
+            // Pierwsze załadowanie: po prostu pokaż stronę bez animacji wyjścia
+            appContent.innerHTML = sectionsContent[page] || sectionsContent['home'];
+            // Małe opóźnienie, żeby przeglądarka zdążyła narysować stare klasy
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    appContent.classList.remove('opacity-0', 'translate-y-5');
+                });
+            });
+            history.replaceState({ page }, '', `#${page}`);
+        } else {
+            // Kolejne przejścia: animacja wyjścia → zmiana treści → animacja wejścia
+            appContent.classList.add('opacity-0', 'translate-y-5');
+            setTimeout(() => {
+                appContent.innerHTML = sectionsContent[page] || sectionsContent['home'];
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        appContent.classList.remove('opacity-0', 'translate-y-5');
+                    });
+                });
+                appContent.scrollTo(0, 0);
+                history.pushState({ page }, '', `#${page}`);
+            }, 500);
+        }
+    }
+
+    // ─── Hamburger ───────────────────────────────────────────────────────────
+    menuBtn.addEventListener('click', () => {
+        menuOverlay.classList.toggle('opacity-0');
+        menuOverlay.classList.toggle('pointer-events-none');
+        menuBtn.classList.toggle('active');
+    });
+
+    function closeMenu(page) {
+        if (!menuOverlay.classList.contains('opacity-0')) {
+            menuOverlay.classList.add('opacity-0', 'pointer-events-none');
+            menuBtn.classList.remove('active');
+        }
+        navigate(page);
+    }
+
+    // ─── Przyciski wstecz/dalej ───────────────────────────────────────────────
+    window.addEventListener('popstate', (e) => {
+        const page = e.state?.page || 'home';
+        // Tymczasowo zresetuj currentPage, żeby navigate() zadziałało
+        currentPage = null;
+        navigate(page);
+    });
+
+    // ─── Swipe (mobile) ───────────────────────────────────────────────────────
+    const sectionOrder = ['home', 'portfolio', 'oferta', 'kontakt', 'wycena'];
+    let touchstartY = 0;
+
+    document.addEventListener('touchstart', e => {
+        touchstartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+        const diff = touchstartY - e.changedTouches[0].screenY;
+        const idx  = sectionOrder.indexOf(currentPage);
+        if (diff > 70  && idx < sectionOrder.length - 1) navigate(sectionOrder[idx + 1]);
+        if (diff < -70 && idx > 0)                        navigate(sectionOrder[idx - 1]);
+    }, { passive: true });
+
+    // ─── Inicjalizacja ────────────────────────────────────────────────────────
+    const initialPage = window.location.hash.substring(1) || 'home';
+    navigate(initialPage);
+    </script>
+</body>
+</html>
