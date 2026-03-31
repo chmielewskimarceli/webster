@@ -51,35 +51,21 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            will-change: transform, opacity;
+            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
+                        opacity   0.45s cubic-bezier(0.76, 0, 0.24, 1);
         }
 
-        /* Stany animacji */
-        .slide-enter-from-bottom {
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        .slide-enter-from-top {
-            transform: translateY(-100%);
-            opacity: 0;
-        }
-        .slide-active {
+        .slide[data-state="idle"] {
             transform: translateY(0);
             opacity: 1;
-            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
-                        opacity   0.65s cubic-bezier(0.76, 0, 0.24, 1);
         }
-        .slide-exit-to-top {
-            transform: translateY(-100%);
-            opacity: 0;
-            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
-                        opacity   0.65s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-        .slide-exit-to-bottom {
+        .slide[data-state="below"] {
             transform: translateY(100%);
             opacity: 0;
-            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
-                        opacity   0.65s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+        .slide[data-state="above"] {
+            transform: translateY(-100%);
+            opacity: 0;
         }
 
         /* Hamburger active state */
@@ -253,52 +239,46 @@
 
         const html = sectionsContent[page] || sectionsContent['home'];
 
-        // Pierwsze załadowanie — wjedź z dołu bez animacji wyjścia
+        // Pierwsze załadowanie — wjedź bez animacji wyjścia
         if (!prevPage) {
-            const slide = makeSlide(html);
-            slide.classList.add('slide-enter-from-bottom');
+            const slide = makeSlide(html, 'below');
             stage.appendChild(slide);
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                slide.classList.add('slide-active');
-                slide.classList.remove('slide-enter-from-bottom');
-            }));
+            // Wymuś layout, potem odblokuj transition do 'idle'
+            slide.getBoundingClientRect();
+            slide.dataset.state = 'idle';
             return;
         }
 
-        // Ustal kierunek: w górę czy w dół?
+        // Kierunek
         const prevIdx = sectionOrder.indexOf(prevPage);
         const nextIdx = sectionOrder.indexOf(page);
-        const goingForward = nextIdx > prevIdx; // forward = nowa wjeżdża z dołu
+        const forward = nextIdx >= prevIdx;
 
         isAnimating = true;
 
-        // Stary slajd
         const oldSlide = stage.querySelector('.slide');
-        oldSlide.classList.add('slide-active'); // upewnij się że ma transition
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            oldSlide.classList.add(goingForward ? 'slide-exit-to-top' : 'slide-exit-to-bottom');
-        }));
-
-        // Nowy slajd — startuje poza ekranem
-        const newSlide = makeSlide(html);
-        newSlide.classList.add(goingForward ? 'slide-enter-from-bottom' : 'slide-enter-from-top');
+        const newSlide = makeSlide(html, forward ? 'below' : 'above');
         stage.appendChild(newSlide);
 
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            newSlide.classList.add('slide-active');
-            newSlide.classList.remove('slide-enter-from-bottom', 'slide-enter-from-top');
-        }));
+        // Wymuś layout żeby przeglądarka "zobaczyła" pozycję startową nowego slajdu
+        newSlide.getBoundingClientRect();
 
-        // Po zakończeniu animacji — usuń stary slajd
-        oldSlide.addEventListener('transitionend', () => {
+        // Uruchom obie animacje jednocześnie
+        oldSlide.dataset.state = forward ? 'above' : 'below';
+        newSlide.dataset.state = 'idle';
+
+        // Posprzątaj po zakończeniu
+        oldSlide.addEventListener('transitionend', (e) => {
+            if (e.propertyName !== 'transform') return;
             oldSlide.remove();
             isAnimating = false;
         }, { once: true });
     }
 
-    function makeSlide(html) {
+    function makeSlide(html, initialState) {
         const el = document.createElement('div');
         el.className = 'slide';
+        el.dataset.state = initialState;
         el.innerHTML = html;
         return el;
     }
