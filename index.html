@@ -267,12 +267,11 @@
         oldSlide.dataset.state = forward ? 'above' : 'below';
         newSlide.dataset.state = 'idle';
 
-        // Posprzątaj po zakończeniu
-        oldSlide.addEventListener('transitionend', (e) => {
-            if (e.propertyName !== 'transform') return;
+        // Posprzątaj po zakończeniu (zsynchronizowane z CSS transition 0.65s)
+        setTimeout(() => {
             oldSlide.remove();
             isAnimating = false;
-        }, { once: true });
+        }, 680);
     }
 
     function makeSlide(html, initialState) {
