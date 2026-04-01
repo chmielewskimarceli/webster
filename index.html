@@ -204,7 +204,16 @@
         setTimeout(() => {
             main.innerHTML = sectionsContent[page] || sectionsContent['home'];
             window.scrollTo(0, 0);
-            // Fade in
+            // Home = pełny ekran bez scrolla, reszta scrolluje
+            if (page === 'home') {
+                document.body.style.overflow = 'hidden';
+                main.style.minHeight = '100vh';
+                main.style.height = '100vh';
+            } else {
+                document.body.style.overflow = '';
+                main.style.height = '';
+                main.style.minHeight = '100vh';
+            }
             main.style.opacity = '1';
         }, 400);
     }
@@ -231,6 +240,10 @@
     main.innerHTML = sectionsContent[init] || sectionsContent['home'];
     currentPage = init;
     history.replaceState({ page: init }, '', '#' + init);
+    if (init === 'home') {
+        document.body.style.overflow = 'hidden';
+        main.style.height = '100vh';
+    }
     setTimeout(() => { main.style.opacity = '1'; }, 50);
     </script>
 </body>
