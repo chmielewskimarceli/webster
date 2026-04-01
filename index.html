@@ -60,10 +60,10 @@
             STUDIO.JS
         </div>
         <div class="hidden md:flex items-center gap-8">
-            <a href="#home"      onclick="navigate('home')"      class="text-sm uppercase tracking-widest hover:text-silver-light transition">Start</a>
-            <a href="#portfolio" onclick="navigate('portfolio')" class="text-sm uppercase tracking-widest hover:text-silver-light transition">Portfolio</a>
-            <a href="#oferta"    onclick="navigate('oferta')"    class="text-sm uppercase tracking-widest hover:text-silver-light transition">Oferta</a>
-            <a href="#kontakt"   onclick="navigate('kontakt')"   class="text-sm uppercase tracking-widest hover:text-silver-light transition">Kontakt</a>
+            <a href="#" onclick="event.preventDefault();navigate('home')"      class="text-sm uppercase tracking-widest hover:text-silver-light transition">Start</a>
+            <a href="#" onclick="event.preventDefault();navigate('portfolio')" class="text-sm uppercase tracking-widest hover:text-silver-light transition">Portfolio</a>
+            <a href="#" onclick="event.preventDefault();navigate('oferta')"    class="text-sm uppercase tracking-widest hover:text-silver-light transition">Oferta</a>
+            <a href="#" onclick="event.preventDefault();navigate('kontakt')"   class="text-sm uppercase tracking-widest hover:text-silver-light transition">Kontakt</a>
             <button onclick="navigate('wycena')" class="border border-white/20 px-4 py-2 text-sm hover:bg-white hover:text-black transition">Wycena</button>
         </div>
         <button id="menu-btn" class="md:hidden group flex flex-col gap-1.5 focus:outline-none">
