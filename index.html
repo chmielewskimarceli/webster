@@ -52,7 +52,7 @@
         }
     </style>
 </head>
-<body class="bg-matte-black text-white font-sans overflow-hidden">
+<body class="bg-matte-black text-white font-sans">
 
     <!-- NAV -->
     <nav class="fixed top-0 left-0 w-full z-[100] p-6 flex justify-between items-center bg-transparent">
@@ -86,7 +86,7 @@
     </div>
 
     <!-- CONTENT -->
-    <main id="main" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;"></main>
+    <main id="main" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding-top:80px;padding-bottom:48px;opacity:0;transition:opacity 0.4s ease;"></main>
 
     <!-- FOOTER -->
     <footer class="fixed bottom-0 left-0 w-full z-80 p-4 text-xs text-gray-600 flex justify-between items-center bg-transparent">
@@ -203,6 +203,7 @@
 
         setTimeout(() => {
             main.innerHTML = sectionsContent[page] || sectionsContent['home'];
+            window.scrollTo(0, 0);
             // Fade in
             main.style.opacity = '1';
         }, 400);
