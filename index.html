@@ -36,38 +36,6 @@
             -webkit-backdrop-filter: blur(10px);
         }
 
-        /* ── Transition container ── */
-        #stage {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-        }
-
-        .slide {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            transition: transform 0.65s cubic-bezier(0.76, 0, 0.24, 1),
-                        opacity   0.45s cubic-bezier(0.76, 0, 0.24, 1);
-        }
-
-        .slide[data-state="idle"] {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .slide[data-state="below"] {
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        .slide[data-state="above"] {
-            transform: translateY(-100%);
-            opacity: 0;
-        }
-
         /* Hamburger active state */
         #menu-btn.active div:nth-child(1) {
             transform: translateY(8px) rotate(45deg);
@@ -117,8 +85,8 @@
         </ul>
     </div>
 
-    <!-- STAGE: tu żyją slajdy -->
-    <div id="stage"></div>
+    <!-- CONTENT -->
+    <main id="main" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;"></main>
 
     <!-- FOOTER -->
     <footer class="fixed bottom-0 left-0 w-full z-80 p-4 text-xs text-gray-600 flex justify-between items-center bg-transparent">
@@ -220,69 +188,26 @@
         `,
     };
 
-    // ─── Stan ─────────────────────────────────────────────────────────────────
-    const stage       = document.getElementById('stage');
-    const menuBtn     = document.getElementById('menu-btn');
+    const main = document.getElementById('main');
+    const menuBtn = document.getElementById('menu-btn');
     const menuOverlay = document.getElementById('menu-overlay');
-
-    const sectionOrder = ['home', 'portfolio', 'oferta', 'kontakt', 'wycena'];
     let currentPage = null;
-    let isAnimating = false;
 
-    // ─── Nawigacja ze slidem ──────────────────────────────────────────────────
     function navigate(page) {
-        if (currentPage === page || isAnimating) return;
-
-        const prevPage = currentPage;
+        if (currentPage === page) return;
         currentPage = page;
-        history[prevPage ? 'pushState' : 'replaceState']({ page }, '', `#${page}`);
+        history.pushState({ page }, '', '#' + page);
 
-        const html = sectionsContent[page] || sectionsContent['home'];
+        // Fade out
+        main.style.opacity = '0';
 
-        // Pierwsze załadowanie — wjedź bez animacji wyjścia
-        if (!prevPage) {
-            const slide = makeSlide(html, 'below');
-            stage.appendChild(slide);
-            // Wymuś layout, potem odblokuj transition do 'idle'
-            slide.getBoundingClientRect();
-            slide.dataset.state = 'idle';
-            return;
-        }
-
-        // Kierunek
-        const prevIdx = sectionOrder.indexOf(prevPage);
-        const nextIdx = sectionOrder.indexOf(page);
-        const forward = nextIdx >= prevIdx;
-
-        isAnimating = true;
-
-        const oldSlide = stage.querySelector('.slide');
-        const newSlide = makeSlide(html, forward ? 'below' : 'above');
-        stage.appendChild(newSlide);
-
-        // Wymuś layout żeby przeglądarka "zobaczyła" pozycję startową nowego slajdu
-        newSlide.getBoundingClientRect();
-
-        // Uruchom obie animacje jednocześnie
-        oldSlide.dataset.state = forward ? 'above' : 'below';
-        newSlide.dataset.state = 'idle';
-
-        // Posprzątaj po zakończeniu (zsynchronizowane z CSS transition 0.65s)
         setTimeout(() => {
-            oldSlide.remove();
-            isAnimating = false;
-        }, 680);
+            main.innerHTML = sectionsContent[page] || sectionsContent['home'];
+            // Fade in
+            main.style.opacity = '1';
+        }, 400);
     }
 
-    function makeSlide(html, initialState) {
-        const el = document.createElement('div');
-        el.className = 'slide';
-        el.dataset.state = initialState;
-        el.innerHTML = html;
-        return el;
-    }
-
-    // ─── Hamburger ───────────────────────────────────────────────────────────
     menuBtn.addEventListener('click', () => {
         menuOverlay.classList.toggle('opacity-0');
         menuOverlay.classList.toggle('pointer-events-none');
@@ -290,23 +215,22 @@
     });
 
     function closeMenu(page) {
-        if (!menuOverlay.classList.contains('opacity-0')) {
-            menuOverlay.classList.add('opacity-0', 'pointer-events-none');
-            menuBtn.classList.remove('active');
-        }
+        menuOverlay.classList.add('opacity-0', 'pointer-events-none');
+        menuBtn.classList.remove('active');
         navigate(page);
     }
 
-    // ─── Przyciski wstecz/dalej ───────────────────────────────────────────────
     window.addEventListener('popstate', (e) => {
-        const page = e.state?.page || 'home';
         currentPage = null;
-        navigate(page);
+        navigate(e.state?.page || 'home');
     });
 
-    // ─── Inicjalizacja ────────────────────────────────────────────────────────
-    const initialPage = window.location.hash.substring(1) || 'home';
-    navigate(initialPage);
+    // Inicjalizacja
+    const init = window.location.hash.substring(1) || 'home';
+    main.innerHTML = sectionsContent[init] || sectionsContent['home'];
+    currentPage = init;
+    history.replaceState({ page: init }, '', '#' + init);
+    setTimeout(() => { main.style.opacity = '1'; }, 50);
     </script>
 </body>
 </html>
